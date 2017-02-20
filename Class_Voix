@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+# encoding: utf-8
+from pyo import *
+
+s = Server(sr=44100, nchnls=2, buffersize=512, duplex=1).boot()
+
+########################
+
+
+
+#soundbank
+snds = ["samples/01.wav", "samples/02.wav", "samples/03.wav"]
+
+#########################
+
+class Voix :
+    def __init__(self, path = snds[0], taps=12, pulses=7, pitch=1) :
+        self.sample= SndTable(path)
+        self.dur= self.sample.getDur()
+        self.pitch = self.dur*pitch
+        self.trig= Euclide(time=0.12, taps=taps, onsets=pulses).play()
+        self.tuti= TrigEnv(self.trig, self.sample, dur=self.dur)
+    def stop(self):
+        self.trig.stop()
+        return self    
+    def play(self):
+        self.trig.play()
+    def out(self):
+        self.tuti.out()
+        return self
+        
+
+
+tt = Voix(snds[1]).out()
+
+"""
+#sampler
+sf1 = SndTable(path=snds[0])
+dur = sf1.getDur()
+print "Duree: ", dur
+
+#rythm
+tr = Euclide(time=0.12, taps=12, onsets=7, poly=1).play()
+out = TrigEnv(tr, sf1, dur=dur*3).out()
+"""
+
+"""
+# Sampler
+class Sampler() :
+    def __init__(self, path=snds[0], amp=0.5, dcy=0.05):
+        env = Adsr(decay = dcy, mul=amp)
+        sf = SfPlayer(path, mul=env)
+        set.out()= sf.out()
+
+sf = Sampler().out()
+########################
+"""
+
+"""
+class Sampler():
+    def__init__(self, snd, pitch, volume, dcy)
+        'self.snd = snd'
+        self.sf = SfPlayer(path=SOUNDBANK, speed='pitch', mul='env')
+
+        snd = 'select-sound-from-soundbank-here' 
+        pitch = 'pitch-control-here' [0.5,1.5]
+        volume = [0, 1.2]
+        dcy = 'create decay ctrls here'
+        env = Adsr(attack=0.01, decay = dcy, sustain=.2, release=.1, dur=2, mul = volume)
+        'create-volume-control-here'
+
+"""
+
+s.gui(locals())
