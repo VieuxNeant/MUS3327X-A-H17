@@ -17,9 +17,8 @@ class Voix :
     def __init__(self, path = snds[0], taps=12, pulses=7, pitch=1) :
         self.sample= SndTable(path)
         self.dur= self.sample.getDur()
-        self.pitch = self.dur*pitch
         self.trig= Euclide(time=0.12, taps=taps, onsets=pulses).play()
-        self.tuti= TrigEnv(self.trig, self.sample, dur=self.dur)
+        self.tuti= TrigEnv(self.trig, self.sample, dur=self.dur*pitch)
     def stop(self):
         self.trig.stop()
         return self    
@@ -31,7 +30,7 @@ class Voix :
         
 
 
-tt = Voix(snds[1]).out()
+tt = Voix(path=snds[1]).out()
 
 """
 #sampler
