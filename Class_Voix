@@ -5,69 +5,94 @@ from pyo import *
 s = Server(sr=44100, nchnls=2, buffersize=512, duplex=1).boot()
 
 ########################
+###soundbank##############
+snds = ["smpl/01.wav", "smpl/02.wav", "smpl/03.wav"]
 
+########################
+###dictionnaire presets########
+presets = {"khalif": {"taps": 5, "pulses": 2},
+                "cumbia": {"taps": 4, "pulses": 3},
+                "ruchenitza": {"taps": 7, "pulses": 3},                
+                "tresillo": {"taps": 8, "pulses": 3},
+                "ruchenitza2": {"taps": 7, "pulses": 4},
+                "aksak": {"taps": 9, "pulses": 4},
+                "zappa": {"taps": 11, "pulses": 4},
+                "york": {"taps": 6, "pulses": 5}, 
+                "nawakhat": {"taps": 7, "pulses": 5},
+                "cinquillo": {"taps": 8, "pulses": 5},
+                "agsag": {"taps": 9, "pulses": 5},
+                "moussorgsky": {"taps": 11, "pulses": 5},
+                "venda": {"taps": 12, "pulses": 5},
+                "bossa": {"taps": 16, "pulses": 5},
+                "bendir": {"taps": 8, "pulses": 7},
+                "west-africa": {"taps": 12, "pulses": 7},
+                "central-africa": {"taps": 16, "pulses": 9},
+                "preset1": {"taps": 7, "pulses": [5, 3, 4]},
+                "preset2": {"taps": 16, "pulses":[6, 8, 9]},
+                "preset3": {"taps": 11, "pulses": [4, 5, 9]},
+                }
 
-
-#soundbank
-snds = ["samples/01.wav", "samples/02.wav", "samples/03.wav"]
-
-#########################
-
+########################
+########################               
 class Voix :
-    def __init__(self, path = snds[0], taps=12, pulses=7, pitch=1) :
+    def __init__(self, path = snds[0], bpm=160, taps=12, pulses=7, pitch=1) :
         self.sample= SndTable(path)
         self.dur= self.sample.getDur()
-        self.trig= Euclide(time=0.12, taps=taps, onsets=pulses).play()
-        self.tuti= TrigEnv(self.trig, self.sample, dur=self.dur*pitch)
+        self.bpm = Sig(bpm)
+        self.pitch = Sig(pitch)
+        self.time = (30000/self.bpm)*0.001
+        self.tap = taps
+        self.pulse = pulses
+        self.pitpit= self.dur * self.pitch
+        self.trig= Euclide(time=self.time, taps=taps, onsets=pulses).play()
+        self.tuti= TrigEnv(self.trig, self.sample, dur=self.pitpit)
+    
+    def setBPM(self, x):
+        self.bpm.value = x
+        
+    def setPitch(self, x):
+        self.pitch.value = x
+
+    def setTaps(self, x):
+        self.trig.taps = x
+    
+    def setPulses(self, x):
+        self.trig.onsets = x
+        
+    def choose(self, preset_name):
+        preset = presets[preset_name]
+        taps = preset["taps"]
+        pulses = preset["pulses"]
+        self.setTaps(taps)
+        self.setPulses(pulses)        
+            
+    def setPath(self, x):
+        self.sample.path = x
+
     def stop(self):
         self.trig.stop()
         return self    
+
     def play(self):
         self.trig.play()
+
     def out(self):
         self.tuti.out()
         return self
         
+##########################################
+#rt = Voix(path=snds[0], pulses=[4,7]).out() 
+tt = Voix(path=snds[1], taps=8, pulses=3).out()
 
-
-tt = Voix(path=snds[1]).out()
-
-"""
-#sampler
-sf1 = SndTable(path=snds[0])
-dur = sf1.getDur()
-print "Duree: ", dur
-
-#rythm
-tr = Euclide(time=0.12, taps=12, onsets=7, poly=1).play()
-out = TrigEnv(tr, sf1, dur=dur*3).out()
-"""
-
-"""
-# Sampler
-class Sampler() :
-    def __init__(self, path=snds[0], amp=0.5, dcy=0.05):
-        env = Adsr(decay = dcy, mul=amp)
-        sf = SfPlayer(path, mul=env)
-        set.out()= sf.out()
-
-sf = Sampler().out()
-########################
-"""
-
-"""
-class Sampler():
-    def__init__(self, snd, pitch, volume, dcy)
-        'self.snd = snd'
-        self.sf = SfPlayer(path=SOUNDBANK, speed='pitch', mul='env')
-
-        snd = 'select-sound-from-soundbank-here' 
-        pitch = 'pitch-control-here' [0.5,1.5]
-        volume = [0, 1.2]
-        dcy = 'create decay ctrls here'
-        env = Adsr(attack=0.01, decay = dcy, sustain=.2, release=.1, dur=2, mul = volume)
-        'create-volume-control-here'
-
-"""
 
 s.gui(locals())
+
+
+"""
+        self.tuti= TrigEnv(self.trig, self.sample, dur=self.setpitch)
+        self.pitch = pitch
+        self.setPitch = self.dur * self.pitch        
+
+    def setPitch(self, x):
+        self.pitch.value = x
+"""
